@@ -1,6 +1,6 @@
 <?php
 
-$cakeDescription = __d('cake_dev', 'intern-list');
+$cakeDescription = __d('cake_dev', 'QR (aka in-gallery thing)');
 $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 ?>
 <!DOCTYPE html>
