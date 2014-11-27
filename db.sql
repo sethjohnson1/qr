@@ -24,7 +24,8 @@ create table assets(
 	id int not null auto_increment,
 	primary key(id),
 	name varchar(255),
-	asset_value text, -- this could be an image link, block of text, etc.
+	asset_image varchar(255),
+	asset_text text,
 	template_id int, -- maybe this should be a HABTM, but I think this will make it simpler and is fine
 	sortorder int,
 	created datetime,

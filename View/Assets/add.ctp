@@ -14,6 +14,8 @@
 		}
 		else if ($type=='blog'){
 			echo $this->Form->input('blogid');
+			echo $this->Form->input('Get info',array('type'=>'button','id'=>'blogbutton'));
+			echo $this->Form->input('blogjson',array('id'=>'blogjson','type'=>'textarea'));
 		}
 		else {
 			echo $this->Form->input('name');
@@ -58,6 +60,18 @@
             'click', $this->Js->request(
                 array('controller' => 'assets', 'action' => 'ajaxvgal'), array(
 					'update' => '#vgaljson',
+					'async' => true,
+					'data'=>$data,
+					'dataExpression'=>true,
+					'method'=>'POST'
+                )
+            )
+    );
+	
+	$this->Js->get('#blogbutton')->event(
+            'click', $this->Js->request(
+                array('controller' => 'assets', 'action' => 'ajaxblog'), array(
+					'update' => '#blogjson',
 					'async' => true,
 					'data'=>$data,
 					'dataExpression'=>true,
