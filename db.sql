@@ -12,20 +12,23 @@ create table templates(
 	created datetime,
 	modified datetime,
 	active tinyint(1),
-	next_id int,
-	prev_id int,
+	meta_title varchar(70),
+	meta_desc varchar(400), 
+	nextid int,
+	previd int,
 	code int
 );
 
 drop table assets;
-create table templates(
+create table assets(
 	id int not null auto_increment,
 	primary key(id),
 	name varchar(255),
 	asset_value text, -- this could be an image link, block of text, etc.
 	template_id int, -- maybe this should be a HABTM, but I think this will make it simpler and is fine
+	sortorder int,
 	created datetime,
-	modified datetime,
+	modified datetime
 );
 
 
@@ -43,12 +46,12 @@ create table beacons(
 	strength int,
 	museum varchar(10),
 	-- relationships
-	template_id
+	template_id int
 );
 
 -- for global settings just proof-of-concept I guess, name could be "top_logo" and value would be "something.jpg"
-drop table globals;
-create table globals(
+drop table preferences;
+create table preferences(
 	id int not null auto_increment,
 	primary key(id),
 	name varchar(255),
