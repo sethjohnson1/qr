@@ -1,25 +1,11 @@
 <?php
 App::uses('AppController', 'Controller');
-/**
- * Assets Controller
- *
- * @property Asset $Asset
- * @property PaginatorComponent $Paginator
- */
+App::uses('htmlpurifier/HTMLPurifier.standalone', 'Vendor');
+
 class AssetsController extends AppController {
 
-/**
- * Components
- *
- * @var array
- */
-	public $components = array('Paginator');
+	public $components = array('Paginator','Clean');
 
-/**
- * index method
- *
- * @return void
- */
 	public function index() {
 		$this->Asset->recursive = 0;
 		$this->set('assets', $this->Paginator->paginate());
@@ -85,16 +71,31 @@ class AssetsController extends AppController {
 				return true;	
 			}
 			if (isset($this->request->data['Asset']['blogjson'])){
-			
-				$blog=json_decode($this->request->data['Asset']['blogjson']);
-				debug((array)$this->request->data['Asset']['blogjson']);
-				
-				/****
-				LEFT OFF HREE
-				need null check as some results don't encode (i.e. blog id 23294 returns null and 23159 encodes properly)
-				**/
-				debug($blog);
-				return true;
+				$blog=json_decode($this->request->data['Asset']['blogjson'],true);
+				$this->set('blog',$blog);
+				if ($blog==null){
+					$this->Session->setFlash(__('Error decoding JSON. Please contact admin'));
+					return true;
+				}
+				else{
+				//this is the basic idea of a blog save, but there are some issues (such as downloading the content)
+					$this->Asset->deleteAll(array('Asset.template_id'=>$id));
+					$this->Asset->create();
+					$asset['name']='title';
+					$asset['asset_text']=$blog['title'];
+					$asset['template_id']=$this->request->data['Asset']['template_id'];
+					if ($this->Asset->save($asset)) $this->Session->setFlash(__('The asset has been saved.'));
+					else $this->Session->setFlash(__('Title could not be saved'));
+					
+					$this->Asset->create();
+					$asset['name']='content';
+					$asset['asset_text']=$blog['content'];
+					$asset['template_id']=$this->request->data['Asset']['template_id'];
+					if ($this->Asset->save($asset)) $this->Session->setFlash(__('The asset has been saved.'));
+					else $this->Session->setFlash(__('Title could not be saved'));
+					
+					return true;
+				}
 			}
 			
 		//debug($this->request->data);
@@ -132,19 +133,21 @@ class AssetsController extends AppController {
 		$this->set(compact('type','template','id'));
 	}
 
+
 	public function ajaxblog() {
+
 		//disabled for testing
 		//if ($this->request->is('ajax')) {
 		
 		$ch = curl_init();
 		$timeout = 5;
- 		curl_setopt($ch,CURLOPT_URL,'http://centerofthewest.org/wp-json/posts/'.$this->request->data['Asset']['blogid'].'/');
+ 		curl_setopt($ch,CURLOPT_URL,'http://centerofthewest.org/wp-json/posts/'.$this->request->data['Asset']['blogid']);
+ 		//curl_setopt($ch,CURLOPT_URL,'http://centerofthewest.org/wp-json/posts/23159');
 		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
 		curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,$timeout);
 		$data = curl_exec($ch);
 		curl_close($ch);
-		//just send straight data and we'll decode when the form is submitted
-         $this->set('content', $data); 
+        $this->set('content', $data); 
 
         $this->render('ajax_response', 'ajax');
 		//}

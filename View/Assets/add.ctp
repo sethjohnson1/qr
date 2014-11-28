@@ -1,5 +1,9 @@
 <div class="assets form">
 <?php 
+
+//array_walk($blog,create_function('&$s', '$s = htmlentities($s);'));
+//array_walk($blog,htmlentities);
+echo $blog['content'];
 	echo $this->Form->create('Asset');
 		if ($type=='splash'){
 			echo $this->Form->input('Attribute.image_path');
@@ -15,7 +19,7 @@
 		else if ($type=='blog'){
 			echo $this->Form->input('blogid');
 			echo $this->Form->input('Get info',array('type'=>'button','id'=>'blogbutton'));
-			echo $this->Form->input('blogjson',array('id'=>'blogjson','type'=>'textarea'));
+			echo $this->Form->input('blogjson',array('id'=>'blogjson','type'=>'textarea','accept-charset'=>'UTF-8'));
 		}
 		else {
 			echo $this->Form->input('name');
