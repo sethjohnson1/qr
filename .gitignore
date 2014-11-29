@@ -5,6 +5,7 @@
 /tmp
 /Vendor/composer
 /Vendor/autoload.php
+/uploads/
 
 # OS generated files #
 ######################
