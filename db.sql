@@ -21,12 +21,14 @@ create table templates(
 
 drop table assets;
 create table assets(
-	id int not null auto_increment,
+	id char(36) not null,
 	primary key(id),
 	name varchar(255),
-	asset_image varchar(255),
 	asset_text text,
-	template_id int, -- maybe this should be a HABTM, but I think this will make it simpler and is fine
+	filename varchar(255),
+	filesize int(11),
+	filemime varchar(45),
+	template_id int, -- maybe this could be a HABTM, but I think this will make it simpler and is fine
 	sortorder int,
 	created datetime,
 	modified datetime

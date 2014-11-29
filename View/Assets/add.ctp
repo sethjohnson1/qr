@@ -3,29 +3,34 @@
 
 //array_walk($blog,create_function('&$s', '$s = htmlentities($s);'));
 //array_walk($blog,htmlentities);
-echo $blog['content'];
-	echo $this->Form->create('Asset');
+//echo $blog['content'];
+	echo $this->Form->create('Asset',array('enctype'=>'multipart/form-data'));
 		if ($type=='splash'){
-			echo $this->Form->input('Attribute.image_path');
-			echo $this->Form->input('Attribute.brief_text');
+			$asset_text='';
+			echo $this->Form->input('file', array('type' => 'file','label'=>'upload 640x480(orwhatever) image'));
+			if (isset($template['Asset'][0]['asset_text'])) $asset_text=$template['Asset'][0]['asset_text'];
+			echo $this->Form->input('Attribute.asset_text',array('value'=>$asset_text));
 		}
 		else if ($type=='vgal'){
-		
 			echo $this->Form->input('vgalid');
 			echo $this->Form->input('Get info',array('type'=>'button','id'=>'vgalbutton'));
-			echo $this->Form->input('vgaljson',array('id'=>'vgaljson','type'=>'textarea'));
-			
+			echo $this->Form->input('vgaljson',array('id'=>'vgaljson','type'=>'textarea'));			
 		}
 		else if ($type=='blog'){
 			echo $this->Form->input('blogid');
 			echo $this->Form->input('Get info',array('type'=>'button','id'=>'blogbutton'));
 			echo $this->Form->input('blogjson',array('id'=>'blogjson','type'=>'textarea','accept-charset'=>'UTF-8'));
 		}
-		else {
-			echo $this->Form->input('name');
-			echo $this->Form->input('asset_value');
-			echo $this->Form->input('sortorder');
+		else if ($type=='audio'){
+		echo $this->Form->input('Attribute.audio_file', array('type' => 'file','label'=>'audio in mp3(?)'));
+		echo $this->Form->input('Attribute.image_file', array('type' => 'file','label'=>'image (list exact dimensions)'));
+		$asset_text='';
+		if (isset($template['Asset'][0]['asset_text'])) $asset_text=$template['Asset'][0]['asset_text'];
+		echo $this->Form->input('Attribute.asset_text',array('value'=>$asset_text));
 			
+		}
+		else {
+			echo ' Template type not found. Something has gone wrong. Go back to the beginning or ask for help if you keep getting here.';	
 		}
 		
 		echo $this->Form->input('template_id',array('value'=>$id,'type'=>'hidden'));

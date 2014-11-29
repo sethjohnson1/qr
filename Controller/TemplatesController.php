@@ -10,7 +10,7 @@ class TemplatesController extends AppController {
 
 	public function beforeFilter() {
 		parent::beforeFilter();
-		$templates=array('splash'=>'Big Image','blog'=>'Blog post','vgal'=>'Virtual Gallery');
+		$templates=array('splash'=>'Splash page','audio'=>'Audio page','blog'=>'Blog post','vgal'=>'Virtual Gallery');
 		$this->set('templates',$templates);
 	}
 	public $components = array('Paginator');

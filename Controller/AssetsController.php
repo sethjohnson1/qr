@@ -34,19 +34,22 @@ class AssetsController extends AppController {
 				$vgal=json_decode($this->request->data['Asset']['vgaljson'],true);
 				//again, need to do this Delete after save somehow but this is Q&D
 				$this->Asset->deleteAll(array('Asset.template_id'=>$id));
-				
-				//loop through treasures
+				foreach (glob(APP.'uploads'.DS.$this->request->data['Asset']['template_id'].'_*') as $filename) unlink($filename);
+				//loop through treasures to save and copy image
 				foreach ($vgal['apivar']['Items'] as $key=>$value){
 					if (isset($value['TreasuresUsergal']['comments'])) $comment=$value['TreasuresUsergal']['comments'];
 					else $comment=$value['Treasure']['synopsis'];
 					$this->Asset->create();
 					$asset['name']='treasure';
 					$asset['asset_text']=$comment;
-					$asset['asset_image']=$value['Treasure']['img'];
+					$asset['filename']=$value['Treasure']['img'];
 					$asset['sortorder']=$value['TreasuresUsergal']['ord'];
 					$asset['template_id']=$this->request->data['Asset']['template_id'];
-					//debug($value);
-					//need to set some login for this Delete after the save . . .
+					$uuid=String::uuid();
+					$asset['id']=$uuid;
+					$img=str_replace(' ','_',$value['Treasure']['img']);
+					//eventually this will copy the "big" image from the CDN . .  or what about locally? Compress it on-the-fly?? 
+					copy('http://collections.centerofthewest.org/zoomify/1/'.$img.'/TileGroup0/0-0-0.jpg', APP.'uploads'.DS.$this->request->data['Asset']['template_id'].'_'.$uuid);
 					
 					if ($this->Asset->save($asset)) {
 						//$this->Session->setFlash(__('The asset has been saved.'));
@@ -63,12 +66,8 @@ class AssetsController extends AppController {
 				$asset['name']='description';
 				$asset['asset_text']=$vgal['apivar']['Usergal']['Usergal']['gloss'];
 				
-				if ($this->Asset->save($asset)) ;
-				else $this->Session->setFlash(__('Something went horribly wrong.'));
-				
-				//debug($vgal);
-				//need some redirect, session msg, etc. here for now just this
-				return true;	
+				if ($this->Asset->save($asset)) $this->Session->setFlash(__('Saved the vgal'));
+				else $this->Session->setFlash(__('Something went horribly wrong.'));	
 			}
 			if (isset($this->request->data['Asset']['blogjson'])){
 				$blog=json_decode($this->request->data['Asset']['blogjson'],true);
@@ -78,7 +77,7 @@ class AssetsController extends AppController {
 					return true;
 				}
 				else{
-				//this is the basic idea of a blog save, but there are some issues (such as downloading the content)
+				//this is the basic idea of a blog save, but there are some issues (such as what to do with HTML tags)
 					$this->Asset->deleteAll(array('Asset.template_id'=>$id));
 					$this->Asset->create();
 					$asset['name']='title';
@@ -92,46 +91,109 @@ class AssetsController extends AppController {
 					$asset['asset_text']=$blog['content'];
 					$asset['template_id']=$this->request->data['Asset']['template_id'];
 					if ($this->Asset->save($asset)) $this->Session->setFlash(__('The asset has been saved.'));
-					else $this->Session->setFlash(__('Title could not be saved'));
+					else $this->Session->setFlash(__('Content could not be saved'));
 					
+					//get all the images, for the iOS version we'll need to download them somehow
+					//this can be seen above in vgal
+					$doc = new DOMDocument();
+					@$doc->loadHTML($blog['content']);
+					$tags = $doc->getElementsByTagName('img');
+					foreach ($tags as $key=>$tag) {
+						//but for now we're just going to save to DB
+						//debug( $tag->getAttribute('src'));
+						$this->Asset->create();
+						$asset['name']='image';
+						$asset['sortorder']=$key;
+						$asset['asset_text']=$tag->getAttribute('src');
+						$asset['template_id']=$this->request->data['Asset']['template_id'];
+						if ($this->Asset->save($asset)) $this->Session->setFlash(__('The asset has been saved.'));
+						else $this->Session->setFlash(__('Image '.$key.' could not be saved'));
+					}
+						
+					//debug($img);
 					return true;
 				}
 			}
 			
-		//debug($this->request->data);
-		$asset=array();
-		
-		//left as proof of concept but now img and text can be a single field
-		foreach ($this->request->data['Attribute'] as $key=>$value){
-			$this->Asset->create();
-			$asset['name']=$key;
-			$asset['asset_text']=$value;
-			$asset['template_id']=$this->request->data['Asset']['template_id'];
+			if ($type=='splash'){	
+				$asset=array();
+				if ($this->request->data['Asset']['file']['error']!=0){
+					$this->Session->setFlash(__('File upload returned an error'));
+					break;
+				}
+				debug($this->request->data['Asset']['file']);
+				$uuid=String::uuid();
+				$this->Asset->create();
+				$asset=$this->request->data['Attribute'];
+				$asset['id']=$uuid;
+				$asset['template_id']=$this->request->data['Asset']['template_id'];
+				$asset['name']=$this->request->data['Asset']['file']['name'];
+				$asset['filesize']=$this->request->data['Asset']['file']['size'];
+				$asset['filemime']=$this->request->data['Asset']['file']['type'];
+				//need to set some logic for delete and unlink
+				
+				//remove all previously linked files
+				foreach (glob(APP.'uploads'.DS.$this->request->data['Asset']['template_id'].'_*') as $filename) unlink($filename);
+				if (move_uploaded_file($this->request->data['Asset']['file']['tmp_name'], APP.'uploads'.DS.$this->request->data['Asset']['template_id'].'_'.$uuid)){
+					$this->Asset->deleteAll(array('Asset.template_id'=>$id));
+					if ($this->Asset->save($asset)) {
+						$this->Session->setFlash(__('The asset has been saved!'));
+						//return $this->redirect(array('action' => 'index'));
+					}
+					else {
+						$this->Session->setFlash(__('Something went horribly wrong.'));
+					}
+				}
+				else $this->Session->setFlash(__('Error moving file to upload dir. Check permissions?'));
+			}
 			
-			//need to set some login for this Delete after the save . . .
-			$this->Asset->deleteAll(array('Asset.template_id'=>$id));
-			if ($this->Asset->save($asset)) {
-				$this->Session->setFlash(__('The asset has been saved.'));
-				//return $this->redirect(array('action' => 'index'));
+			if ($type=='audio'){
+				debug($this->request->data);
+				if ($this->request->data['Attribute']['audio_file']['error']!=0 && $this->request->data['Attribute']['image_file']['error']!=0){
+					$this->Session->setFlash(__('File upload returned an error'));
+					break;
+				}
+				
+				//still would like better clean-up...
+				$this->Asset->deleteAll(array('Asset.template_id'=>$id));
+				foreach (glob(APP.'uploads'.DS.$this->request->data['Asset']['template_id'].'_*') as $filename) unlink($filename);
+				
+				
+				$uuid=String::uuid();
+				$this->Asset->create();
+				$asset['id']=$uuid;
+				$asset['template_id']=$this->request->data['Asset']['template_id'];
+				$asset['name']='audio_file';
+				//stash the text here as well - no need for another row at the moment
+				$asset['asset_text']=$this->request->data['Attribute']['asset_text'];
+				$asset['filesize']=$this->request->data['Attribute']['audio_file']['size'];
+				$asset['filemime']=$this->request->data['Attribute']['audio_file']['type'];
+				$asset['filename']=$this->request->data['Attribute']['audio_file']['name'];
+				if ($this->Asset->save($asset)) $this->Session->setFlash(__('The asset has been saved.'));
+				if (move_uploaded_file($this->request->data['Attribute']['audio_file']['tmp_name'], APP.'uploads'.DS.$this->request->data['Asset']['template_id'].'_'.$uuid));
+				else $this->Session->setFlash(__('Audio file data could not be saved'));
+				
+				
+				$asset=array();
+				$uuid=String::uuid();
+				$this->Asset->create();
+				$asset['id']=$uuid;
+				$asset['template_id']=$this->request->data['Asset']['template_id'];
+				$asset['name']='image_file';
+				$asset['filesize']=$this->request->data['Attribute']['image_file']['size'];
+				$asset['filemime']=$this->request->data['Attribute']['image_file']['type'];
+				$asset['filename']=$this->request->data['Attribute']['image_file']['name'];
+				if ($this->Asset->save($asset)) $this->Session->setFlash(__('The asset has been saved.'));
+				if (move_uploaded_file($this->request->data['Attribute']['image_file']['tmp_name'], APP.'uploads'.DS.$this->request->data['Asset']['template_id'].'_'.$uuid));
+				else $this->Session->setFlash(__('Image file data could not be saved'));
+
 			}
-			else {
-				$this->Session->setFlash(__('Something went horribly wrong.'));
-			}
-			//debug($asset);
-		}
-		/*
-			$this->Asset->create();
-			if ($this->Asset->save($this->request->data)) {
-				$this->Session->setFlash(__('The asset has been saved.'));
-				return $this->redirect(array('action' => 'index'));
-			} else {
-				$this->Session->setFlash(__('The asset could not be saved. Please, try again.'));
-			}
-			*/
+			
 		}
 		$template = $this->Asset->Template->find('first',array('conditions'=>array('Template.id'=>$id)));
 		$this->set(compact('type','template','id'));
 	}
+	
 
 
 	public function ajaxblog() {
