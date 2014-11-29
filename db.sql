@@ -14,9 +14,12 @@ create table templates(
 	active tinyint(1),
 	meta_title varchar(70),
 	meta_desc varchar(400), 
+	location varchar(100),
+	creator varchar(255), -- simple way to keep track, and eventually could be used for Auth
 	nextid int,
 	previd int,
-	code int
+	code int,
+	ip varchar(20)
 );
 
 drop table assets;
@@ -47,7 +50,6 @@ create table beacons(
 	major int,
 	minor int,
 	strength int,
-	museum varchar(10),
 	-- relationships
 	template_id int
 );

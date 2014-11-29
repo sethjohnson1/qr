@@ -12,13 +12,15 @@ echo $this->Form->create('Template'); ?>
 		<legend><?php echo __($ae.' Template'); ?></legend>
 	<?php
 		if (isset($edit)) echo $this->Form->input('id');
-		if (!isset($edit)) echo $this->Form->input('name',array('type'=>'select','options'=>$templates));
-		else echo $this->Form->input('name',array('type'=>'hidden'));
+		echo $this->Form->input('name',array('type'=>'select','options'=>$templates,'label'=>'Template type'));
+		//else echo $this->Form->input('name',array('type'=>'hidden'));
+		echo $this->Form->input('location',array('type'=>'select','options'=>$locations));
 		echo $this->Form->input('active',array('checked'=>'checked'));
+		echo $this->Form->input('creator');
 		echo $this->Form->input('meta_title');
 		echo $this->Form->input('meta_desc');
 		echo $this->Form->input('nextid');
-		echo $this->Form->input('previd');
+		//echo $this->Form->input('previd');
 		echo $this->Form->input('code');
 	?>
 	</fieldset>

@@ -11,7 +11,9 @@ class TemplatesController extends AppController {
 	public function beforeFilter() {
 		parent::beforeFilter();
 		$templates=array('splash'=>'Splash page','audio'=>'Audio page','blog'=>'Blog post','vgal'=>'Virtual Gallery');
-		$this->set('templates',$templates);
+		$locations=array('BBM'=>'BBM','CFM'=>'CFM','DMNH'=>'DMNH','Garden'=>'Garden','HMRL'=>'HMRL','PIM'=>'PIM','WG'=>'WG');
+		$this->set(compact('templates','locations'));
+		//$this->set('templates',$templates);
 	}
 	public $components = array('Paginator');
 
@@ -54,7 +56,7 @@ class TemplatesController extends AppController {
 				$this->Session->setFlash(__('The template has been saved.'));
 				return $this->redirect(array('controller'=>'assets','action' => 'add',$this->request->data['Template']['name'],$id));
 			} else {
-				$this->Session->setFlash(__('The template could not be saved. Please, try again.'));
+				$this->Session->setFlash(__('The template could not be saved. Please, try again. Double-check nextid'));
 			}
 		} else {
 			$options = array('conditions' => array('Template.' . $this->Template->primaryKey => $id));
