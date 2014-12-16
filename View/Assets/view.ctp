@@ -13,7 +13,7 @@
 		</dd>
 		<dt><?php echo __('Asset Value'); ?></dt>
 		<dd>
-			<?php echo h($asset['Asset']['asset_value']); ?>
+			<?php echo ($asset['Asset']['asset_text']); ?>
 			&nbsp;
 		</dd>
 		<dt><?php echo __('Template'); ?></dt>

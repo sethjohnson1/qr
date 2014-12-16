@@ -77,7 +77,7 @@ class AssetsController extends AppController {
 					return true;
 				}
 				else{
-				//this is the basic idea of a blog save, but there are some issues (such as what to do with HTML tags)
+				//this is the basic idea of a blog save, but there are some issues (such as what to do with HTML tags) and 23294
 					$this->Asset->deleteAll(array('Asset.template_id'=>$id));
 					$this->Asset->create();
 					$asset['name']='title';
@@ -111,7 +111,7 @@ class AssetsController extends AppController {
 					}
 						
 					//debug($img);
-					return true;
+				//	return true;
 				}
 			}
 			
@@ -209,7 +209,8 @@ class AssetsController extends AppController {
 		curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,$timeout);
 		$data = curl_exec($ch);
 		curl_close($ch);
-        $this->set('content', $data); 
+		
+        $this->set('content', htmlentities($data)); 
 
         $this->render('ajax_response', 'ajax');
 		//}
