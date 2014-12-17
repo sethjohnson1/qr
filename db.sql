@@ -4,7 +4,36 @@ everything: created, modified, active, deleted etc. add later
 
 /* add meta to templates */
 /* maybe make an "assets" table??*/
-drop table  templates;
+
+drop table if exists users;
+create table users(
+	id int not null auto_increment,
+	primary key(id),
+	name varchar(255),
+	created datetime,
+	modified datetime,
+	last_login datetime,
+	active tinyint(1),
+	ip varchar(20),
+	provider varchar(100),
+	provider_uid varchar(200),
+	username varchar(255)
+);
+
+drop table if exists comments;
+create table comments(
+	id int not null auto_increment,
+	primary key(id),
+	thoughts text, -- because the word 'comment' is reserved
+	rating int,
+	created datetime,
+	modified datetime,
+	user_id int,
+	hidden tinyint(1),
+	flagged int -- this is a number so we can count number of flags, maybe shut it down after so many
+);
+
+drop table if exists templates;
 create table templates(
 	id int not null auto_increment,
 	primary key(id),
@@ -22,7 +51,7 @@ create table templates(
 	ip varchar(20)
 );
 
-drop table assets;
+drop table if exists assets;
 create table assets(
 	id char(36) not null,
 	primary key(id),
@@ -38,7 +67,7 @@ create table assets(
 );
 
 
-drop table  beacons;
+drop table if exists beacons;
 create table beacons(
 	id int not null auto_increment,
 	primary key(id),
@@ -55,7 +84,7 @@ create table beacons(
 );
 
 -- for global settings just proof-of-concept I guess, name could be "top_logo" and value would be "something.jpg"
-drop table preferences;
+drop table  if exists preferences;
 create table preferences(
 	id int not null auto_increment,
 	primary key(id),

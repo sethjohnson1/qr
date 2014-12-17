@@ -16,9 +16,10 @@ spl_autoload_register(array('App', 'load'), true, true);
 //likely will not need
 //CakePlugin::load('HybridAuth', array('bootstrap' => true));
 
- CakePlugin::load(array('DebugKit','Search','Utils'));
- CakePlugin::load('Users',array('routes'=>true));
-CakePlugin::load('ExtAuth');
+ CakePlugin::load(array('DebugKit'));
+ //CakePlugin::load(array('DebugKit','Search','Utils'));
+ //CakePlugin::load('Users',array('routes'=>true));
+//CakePlugin::load('ExtAuth');
 
 
 
