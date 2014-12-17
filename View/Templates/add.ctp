@@ -16,11 +16,11 @@ echo $this->Form->create('Template'); ?>
 		//else echo $this->Form->input('name',array('type'=>'hidden'));
 		echo $this->Form->input('location',array('type'=>'select','options'=>$locations));
 		echo $this->Form->input('active',array('checked'=>'checked'));
-		echo $this->Form->input('creator');
+		echo $this->Form->input('creator',array('label'=>'Creator. Name must match to link templates'));
 		echo $this->Form->input('meta_title');
 		echo $this->Form->input('meta_desc');
-		echo $this->Form->input('nextid');
-		//echo $this->Form->input('previd');
+		echo $this->Form->input('nextid',array('label'=>'Next ID. Be sure that creator name matches!'));
+		//echo $this->Form->input('previd',array('label'=>'you do not need to fill this in, here for testing'));
 		echo $this->Form->input('code');
 	?>
 	</fieldset>

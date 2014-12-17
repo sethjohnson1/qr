@@ -33,7 +33,7 @@ class TemplatesController extends AppController {
 	}
 
 
-	public function add() {
+	public function add($id = null) {
 		if ($this->request->is('post')) {
 			$this->Template->create();
 			if ($this->Template->save($this->request->data)) {
@@ -65,6 +65,7 @@ class TemplatesController extends AppController {
 		$this->set('edit',true);
 		$this->render('add');
 	}
+	
 
 
 	public function delete($id = null) {

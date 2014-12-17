@@ -10,16 +10,19 @@ class Template extends AppModel {
 
 	public function beforeSave($options=array()){
 		if(!empty($this->data['Template']['nextid'])){
-			if($prev=$this->find('first',array('conditions'=>array('Template.id'=>$this->data['Template']['nextid'])))){
+			$prev=$this->find('first',array('conditions'=>array('Template.id'=>$this->data['Template']['nextid'])));
+			//check that creator names match (which covers also whether or not the record exists)
+			if($prev['Template']['creator']==$this->data['Template']['creator']){		
 				$savedata['id']=$prev['Template']['id'];
 				$savedata['previd']=$this->data['Template']['id'];
-				$this->Template->create();
-				if ($this->Template->save($savedata)) return true;
+				//this is how to save from the Model
+				$template=new Template();
+				$template->create();
+				$template->set($savedata);
+				if ($template->save()) return true;
 				else return false;
-				//debug($prev);
-				//return false;
 			}
-			//lazy error checking, a message might be nice...
+			//lazy error checking, but moving on
 			else return false;
 		}
 		
@@ -29,6 +32,7 @@ class Template extends AppModel {
 		return true;
 			
 	}
+	
 
 
 	public $hasMany = array(
