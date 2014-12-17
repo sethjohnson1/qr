@@ -6,6 +6,8 @@
 /Vendor/composer
 /Vendor/autoload.php
 /uploads/
+/webroot/uploads
+/webroot/img/uploads
 
 # OS generated files #
 ######################

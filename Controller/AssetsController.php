@@ -34,7 +34,7 @@ class AssetsController extends AppController {
 				$vgal=json_decode($this->request->data['Asset']['vgaljson'],true);
 				//again, need to do this Delete after save somehow but this is Q&D
 				$this->Asset->deleteAll(array('Asset.template_id'=>$id));
-				foreach (glob(APP.'uploads'.DS.$this->request->data['Asset']['template_id'].'_*') as $filename) unlink($filename);
+				foreach (glob('img/uploads/'.$this->request->data['Asset']['template_id'].'_*') as $filename) unlink($filename);
 				//loop through treasures to save and copy image
 				foreach ($vgal['apivar']['Items'] as $key=>$value){
 					if (isset($value['TreasuresUsergal']['comments'])) $comment=$value['TreasuresUsergal']['comments'];
@@ -42,14 +42,20 @@ class AssetsController extends AppController {
 					$this->Asset->create();
 					$asset['name']='treasure';
 					$asset['asset_text']=$comment;
-					$asset['filename']=$value['Treasure']['img'];
 					$asset['sortorder']=$value['TreasuresUsergal']['ord'];
 					$asset['template_id']=$this->request->data['Asset']['template_id'];
+					//first get the thumbnail, which will use the id
 					$uuid=String::uuid();
 					$asset['id']=$uuid;
-					$img=str_replace(' ','_',$value['Treasure']['img']);
-					//eventually this will copy the "big" image from the CDN . .  or what about locally? Compress it on-the-fly?? 
-					copy('http://collections.centerofthewest.org/zoomify/1/'.$img.'/TileGroup0/0-0-0.jpg', APP.'uploads'.DS.$this->request->data['Asset']['template_id'].'_'.$uuid);
+					$img=str_replace(' ','_',$value['Treasure']['img']); 
+					copy('http://collections.centerofthewest.org/zoomify/1/'.$img.'/TileGroup0/0-0-0.jpg', 'img/uploads/'.$this->request->data['Asset']['template_id'].'_'.$uuid.'.jpg');
+					
+					//now get the large image, which will use the filename field
+					$uuid=String::uuid();
+					$asset['filename']=$uuid;
+					//this is where the url encoding should be fixed for the small number of items with LAME file names
+					copy('http://collectionimages.s3-website-us-west-1.amazonaws.com/1/'.urlencode($value['Treasure']['img']), 'img/uploads/'.$this->request->data['Asset']['template_id'].'_'.$uuid.'.jpg');
+					
 					
 					if ($this->Asset->save($asset)) {
 						//$this->Session->setFlash(__('The asset has been saved.'));
@@ -77,7 +83,7 @@ class AssetsController extends AppController {
 					return true;
 				}
 				else{
-				//this is the basic idea of a blog save, but there are some issues (such as what to do with HTML tags) and 23294
+				//this is the basic idea of a blog save, still need to decide whether to strip HTML tags or leave them...
 					$this->Asset->deleteAll(array('Asset.template_id'=>$id));
 					$this->Asset->create();
 					$asset['name']='title';
@@ -93,13 +99,12 @@ class AssetsController extends AppController {
 					if ($this->Asset->save($asset)) $this->Session->setFlash(__('The asset has been saved.'));
 					else $this->Session->setFlash(__('Content could not be saved'));
 					
-					//get all the images, for the iOS version we'll need to download them somehow
+					//get all the images, for the iOS version we'll need to download them but for now just save to DB
 					//this can be seen above in vgal
 					$doc = new DOMDocument();
 					@$doc->loadHTML($blog['content']);
 					$tags = $doc->getElementsByTagName('img');
 					foreach ($tags as $key=>$tag) {
-						//but for now we're just going to save to DB
 						//debug( $tag->getAttribute('src'));
 						$this->Asset->create();
 						$asset['name']='image';
@@ -121,7 +126,7 @@ class AssetsController extends AppController {
 					$this->Session->setFlash(__('File upload returned an error'));
 					break;
 				}
-				debug($this->request->data['Asset']['file']);
+				//debug($this->request->data['Asset']['file']);
 				$uuid=String::uuid();
 				$this->Asset->create();
 				$asset=$this->request->data['Attribute'];
@@ -147,45 +152,19 @@ class AssetsController extends AppController {
 				else $this->Session->setFlash(__('Error moving file to upload dir. Check permissions?'));
 			}
 			
-			if ($type=='audio'){
+			if ($type=='video'){
 				debug($this->request->data);
-				if ($this->request->data['Attribute']['audio_file']['error']!=0 && $this->request->data['Attribute']['image_file']['error']!=0){
-					$this->Session->setFlash(__('File upload returned an error'));
-					break;
-				}
-				
 				//still would like better clean-up...
 				$this->Asset->deleteAll(array('Asset.template_id'=>$id));
-				foreach (glob(APP.'uploads'.DS.$this->request->data['Asset']['template_id'].'_*') as $filename) unlink($filename);
-				
-				
 				$uuid=String::uuid();
 				$this->Asset->create();
 				$asset['id']=$uuid;
 				$asset['template_id']=$this->request->data['Asset']['template_id'];
-				$asset['name']='audio_file';
+				$asset['name']=$this->request->data['Asset']['youtubeid'];
 				//stash the text here as well - no need for another row at the moment
 				$asset['asset_text']=$this->request->data['Attribute']['asset_text'];
-				$asset['filesize']=$this->request->data['Attribute']['audio_file']['size'];
-				$asset['filemime']=$this->request->data['Attribute']['audio_file']['type'];
-				$asset['filename']=$this->request->data['Attribute']['audio_file']['name'];
 				if ($this->Asset->save($asset)) $this->Session->setFlash(__('The asset has been saved.'));
-				if (move_uploaded_file($this->request->data['Attribute']['audio_file']['tmp_name'], APP.'uploads'.DS.$this->request->data['Asset']['template_id'].'_'.$uuid));
 				else $this->Session->setFlash(__('Audio file data could not be saved'));
-				
-				
-				$asset=array();
-				$uuid=String::uuid();
-				$this->Asset->create();
-				$asset['id']=$uuid;
-				$asset['template_id']=$this->request->data['Asset']['template_id'];
-				$asset['name']='image_file';
-				$asset['filesize']=$this->request->data['Attribute']['image_file']['size'];
-				$asset['filemime']=$this->request->data['Attribute']['image_file']['type'];
-				$asset['filename']=$this->request->data['Attribute']['image_file']['name'];
-				if ($this->Asset->save($asset)) $this->Session->setFlash(__('The asset has been saved.'));
-				if (move_uploaded_file($this->request->data['Attribute']['image_file']['tmp_name'], APP.'uploads'.DS.$this->request->data['Asset']['template_id'].'_'.$uuid));
-				else $this->Session->setFlash(__('Image file data could not be saved'));
 
 			}
 			

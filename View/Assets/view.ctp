@@ -1,42 +1,10 @@
 <div class="assets view">
-<h2><?php echo __('Asset'); ?></h2>
-	<dl>
-		<dt><?php echo __('Id'); ?></dt>
-		<dd>
-			<?php echo h($asset['Asset']['id']); ?>
-			&nbsp;
-		</dd>
-		<dt><?php echo __('Name'); ?></dt>
-		<dd>
-			<?php echo h($asset['Asset']['name']); ?>
-			&nbsp;
-		</dd>
-		<dt><?php echo __('Asset Value'); ?></dt>
-		<dd>
-			<?php echo ($asset['Asset']['asset_text']); ?>
-			&nbsp;
-		</dd>
-		<dt><?php echo __('Template'); ?></dt>
-		<dd>
-			<?php echo $this->Html->link($asset['Template']['name'], array('controller' => 'templates', 'action' => 'view', $asset['Template']['id'])); ?>
-			&nbsp;
-		</dd>
-		<dt><?php echo __('Sortorder'); ?></dt>
-		<dd>
-			<?php echo h($asset['Asset']['sortorder']); ?>
-			&nbsp;
-		</dd>
-		<dt><?php echo __('Created'); ?></dt>
-		<dd>
-			<?php echo h($asset['Asset']['created']); ?>
-			&nbsp;
-		</dd>
-		<dt><?php echo __('Modified'); ?></dt>
-		<dd>
-			<?php echo h($asset['Asset']['modified']); ?>
-			&nbsp;
-		</dd>
-	</dl>
+<?
+//debug($asset);
+//this is a very quick example
+echo $this->Html->image('uploads/'.$asset['Template']['id'].'_'.$asset['Asset']['id'].'.jpg', array());
+
+?>
 </div>
 <div class="actions">
 	<h3><?php echo __('Actions'); ?></h3>

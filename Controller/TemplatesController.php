@@ -10,7 +10,7 @@ class TemplatesController extends AppController {
 
 	public function beforeFilter() {
 		parent::beforeFilter();
-		$templates=array('splash'=>'Splash page','audio'=>'Audio page','blog'=>'Blog post','vgal'=>'Virtual Gallery');
+		$templates=array('splash'=>'Big image','video'=>'AV page','blog'=>'Web article','vgal'=>'Virtual Gallery');
 		$locations=array('BBM'=>'BBM','CFM'=>'CFM','DMNH'=>'DMNH','Garden'=>'Garden','HMRL'=>'HMRL','PIM'=>'PIM','WG'=>'WG');
 		$this->set(compact('templates','locations'));
 		//$this->set('templates',$templates);
