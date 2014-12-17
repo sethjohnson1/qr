@@ -1,37 +1,17 @@
 <?php
 App::uses('AppController', 'Controller');
-/**
- * Users Controller
- *
- * @property User $User
- * @property PaginatorComponent $Paginator
- */
+
 class UsersController extends AppController {
 
-/**
- * Components
- *
- * @var array
- */
-	public $components = array('Paginator');
+	public $components = array('Paginator','ExtAuth.ExtAuth','Auth','Session');
 
-/**
- * index method
- *
- * @return void
- */
+
 	public function index() {
 		$this->User->recursive = 0;
 		$this->set('users', $this->Paginator->paginate());
 	}
 
-/**
- * view method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
+
 	public function view($id = null) {
 		if (!$this->User->exists($id)) {
 			throw new NotFoundException(__('Invalid user'));
@@ -39,66 +19,78 @@ class UsersController extends AppController {
 		$options = array('conditions' => array('User.' . $this->User->primaryKey => $id));
 		$this->set('user', $this->User->find('first', $options));
 	}
+	
+	//now for the ExtAuth stuff
+	
+	public function auth_login($provider) {
+		$result = $this->ExtAuth->login($provider);
+		if ($result['success']) {
 
-/**
- * add method
- *
- * @return void
- */
-	public function add() {
-		if ($this->request->is('post')) {
-			$this->User->create();
-			if ($this->User->save($this->request->data)) {
-				$this->Session->setFlash(__('The user has been saved.'));
-				return $this->redirect(array('action' => 'index'));
-			} else {
-				$this->Session->setFlash(__('The user could not be saved. Please, try again.'));
+			$this->redirect($result['redirectURL']);
+
+		} else {
+			$this->Session->setFlash($result['message']);
+			$this->redirect($this->Auth->loginAction);
+		}
+	}
+	
+	public function auth_callback($provider) {
+		$result = $this->ExtAuth->loginCallback($provider);
+		if ($result['success']) {
+
+			$this->__successfulExtAuth($result['profile'], $result['accessToken']);
+
+		} else {
+			$this->Session->setFlash($result['message']);
+			$this->redirect($this->Auth->loginAction);
+		}
+	}
+	
+	
+	private function __successfulExtAuth($incomingProfile, $accessToken) {
+		$user=$this->User->findByOid($incomingProfile['oid']);
+		if ($user) {
+			$this->__doAuthLogin($user);
+		}
+		else {
+		//make a new account, not much needs to be done with the data the fields were named for the API calls
+			$incomingProfile['ip'] = $_SERVER["REMOTE_ADDR"]; 
+			
+			if ($this->User->save($incomingProfile)){
+				$user['User']=$incomingProfile;
+				$this->__doAuthLogin($user);
+			}
+			else {
+				$this->Session->setFlash('Something has gone wrong. Please try again or contact the system admin.');
+				debug($this->User->invalidFields());
+			}
+		}
+		//debug($incomingProfile);
+	}
+	private function __doAuthLogin($user) {
+		if ($this->Auth->login($user['User'])) {
+			$user['User']['last_login'] = date('Y-m-d H:i:s');
+			if ($this->User->save($user['User'])){
+				$this->Session->setFlash(sprintf(__d('users', '%s you have successfully logged in'), $this->Auth->user('name')));
+				//this doesn't work right, here is where I left off
+				if ($this->Session->read('location')) $this->redirect($this->Session->read('location'));
+				else $this->redirect('/');
+				//return $this->redirect( $this->referer() );
+			}
+			else {
+				$this->Session->setFlash('Something has gone wrong. Please try again or contact the system admin.');
+				debug($this->User->invalidFields());
 			}
 		}
 	}
-
-/**
- * edit method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
-	public function edit($id = null) {
-		if (!$this->User->exists($id)) {
-			throw new NotFoundException(__('Invalid user'));
-		}
-		if ($this->request->is(array('post', 'put'))) {
-			if ($this->User->save($this->request->data)) {
-				$this->Session->setFlash(__('The user has been saved.'));
-				return $this->redirect(array('action' => 'index'));
-			} else {
-				$this->Session->setFlash(__('The user could not be saved. Please, try again.'));
-			}
-		} else {
-			$options = array('conditions' => array('User.' . $this->User->primaryKey => $id));
-			$this->request->data = $this->User->find('first', $options);
-		}
+	
+	public function logout() {
+		//$user = $this->Auth->user();
+		$this->Session->destroy();
+		$this->Session->setFlash('Ok bye-bye');
+		//$this->Session->setFlash(sprintf(__d('users', '%s you have successfully logged out'), $user[$this->{$this->modelClass}->displayField]));
+		if ($this->Session->read('location')) $this->redirect($this->Session->read('location'));
+		else $this->redirect('/');
 	}
 
-/**
- * delete method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
-	public function delete($id = null) {
-		$this->User->id = $id;
-		if (!$this->User->exists()) {
-			throw new NotFoundException(__('Invalid user'));
-		}
-		$this->request->allowMethod('post', 'delete');
-		if ($this->User->delete()) {
-			$this->Session->setFlash(__('The user has been deleted.'));
-		} else {
-			$this->Session->setFlash(__('The user could not be deleted. Please, try again.'));
-		}
-		return $this->redirect(array('action' => 'index'));
-	}
 }

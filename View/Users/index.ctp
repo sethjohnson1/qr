@@ -20,14 +20,14 @@
 	<?php foreach ($users as $user): ?>
 	<tr>
 		<td><?php echo h($user['User']['id']); ?>&nbsp;</td>
-		<td><?php echo h($user['User']['name']); ?>&nbsp;</td>
+		<td><?php echo h($user['User']['given_name']); ?>&nbsp;</td>
 		<td><?php echo h($user['User']['created']); ?>&nbsp;</td>
 		<td><?php echo h($user['User']['modified']); ?>&nbsp;</td>
 		<td><?php echo h($user['User']['last_login']); ?>&nbsp;</td>
 		<td><?php echo h($user['User']['active']); ?>&nbsp;</td>
 		<td><?php echo h($user['User']['ip']); ?>&nbsp;</td>
 		<td><?php echo h($user['User']['provider']); ?>&nbsp;</td>
-		<td><?php echo h($user['User']['provider_uid']); ?>&nbsp;</td>
+		<td><?php //echo h($user['User']['oid']); ?>&nbsp;</td>
 		<td><?php echo h($user['User']['username']); ?>&nbsp;</td>
 		<td class="actions">
 			<?php echo $this->Html->link(__('View'), array('action' => 'view', $user['User']['id'])); ?>
@@ -55,8 +55,11 @@
 <div class="actions">
 	<h3><?php echo __('Actions'); ?></h3>
 	<ul>
-		<li><?php echo $this->Html->link(__('New User'), array('action' => 'add')); ?></li>
+		<li><?php echo $this->Html->link('FBAuth', array('controller' => 'users', 'action' => 'auth_login','Facebook')); ?></li>
+		<li><?php echo $this->Html->link('GAuth', array('controller' => 'users', 'action' => 'auth_login','Google')); ?></li>
+		<li><?php echo $this->Html->link('TAuth', array('controller' => 'users', 'action' => 'auth_login','Twitter')); ?></li>
+		<li><?php echo $this->Html->link('Logout', array('controller' => 'users', 'action' => 'logout')); ?></li>
 		<li><?php echo $this->Html->link(__('List Comments'), array('controller' => 'comments', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Comment'), array('controller' => 'comments', 'action' => 'add')); ?> </li>
+
 	</ul>
 </div>

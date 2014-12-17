@@ -19,7 +19,7 @@ spl_autoload_register(array('App', 'load'), true, true);
  CakePlugin::load(array('DebugKit'));
  //CakePlugin::load(array('DebugKit','Search','Utils'));
  //CakePlugin::load('Users',array('routes'=>true));
-//CakePlugin::load('ExtAuth');
+CakePlugin::load('ExtAuth');
 
 
 

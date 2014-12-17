@@ -9,15 +9,20 @@ drop table if exists users;
 create table users(
 	id int not null auto_increment,
 	primary key(id),
-	name varchar(255),
+	given_name varchar(255),
+	family_name varchar(255),
 	created datetime,
 	modified datetime,
 	last_login datetime,
 	active tinyint(1),
 	ip varchar(20),
 	provider varchar(100),
-	provider_uid varchar(200),
-	username varchar(255)
+	oid varchar(200),
+	user_identity varchar(255),
+	username varchar(255),
+	gender varchar(10),
+	locale varchar(10),
+	picture varchar(255)
 );
 
 drop table if exists comments;

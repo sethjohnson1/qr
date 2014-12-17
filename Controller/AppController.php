@@ -10,7 +10,6 @@ class AppController extends Controller {
 	
 	public function beforeFilter() {
 		parent::beforeFilter();
-		//only enable below for testing
 		$this->Auth->allow();
 
 		//users plugin blackhole fix, started somewhere in CakePHP 2.5.3
@@ -18,6 +17,7 @@ class AppController extends Controller {
 			$this->Security->validatePost = false;
 		}
 			//debug($this->Auth->user());
+			$this->Session->write('location',$this->here);
  	
 	}
 	
