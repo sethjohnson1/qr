@@ -71,11 +71,10 @@ class UsersController extends AppController {
 		if ($this->Auth->login($user['User'])) {
 			$user['User']['last_login'] = date('Y-m-d H:i:s');
 			if ($this->User->save($user['User'])){
-				$this->Session->setFlash(sprintf(__d('users', '%s you have successfully logged in'), $this->Auth->user('name')));
-				//this doesn't work right, here is where I left off
+				$this->Session->setFlash('Thanks '.$this->Auth->user('given_name').'! You are logged in.');
+				
 				if ($this->Session->read('location')) $this->redirect($this->Session->read('location'));
 				else $this->redirect('/');
-				//return $this->redirect( $this->referer() );
 			}
 			else {
 				$this->Session->setFlash('Something has gone wrong. Please try again or contact the system admin.');
@@ -86,10 +85,11 @@ class UsersController extends AppController {
 	
 	public function logout() {
 		//$user = $this->Auth->user();
+		$location=$this->Session->read('location');
 		$this->Session->destroy();
 		$this->Session->setFlash('Ok bye-bye');
 		//$this->Session->setFlash(sprintf(__d('users', '%s you have successfully logged out'), $user[$this->{$this->modelClass}->displayField]));
-		if ($this->Session->read('location')) $this->redirect($this->Session->read('location'));
+		if ($location) $this->redirect($location);
 		else $this->redirect('/');
 	}
 

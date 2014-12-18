@@ -16,9 +16,19 @@ class AppController extends Controller {
 		if (isset($this->Security) && ( $this->action == 'login' || $this->action == 'reset_password')) {
 			$this->Security->validatePost = false;
 		}
-			//debug($this->Auth->user());
-			$this->Session->write('location',$this->here);
- 	
+			
+			//for getting the user back to whence they came after logging in, using a whitelist for now
+			if ($this->request->params['action']=='index'||$this->request->params['action']=='view'){
+				//this is dirty, but for some reason it writes /qr/qr whenever redirecting, and I don't know how it will behave on its own domain (probably fine), 
+				//so for now this little bit of dickery
+				$current=explode('/',$this->here);
+				unset($current[0]);
+				unset($current[1]);
+				$current=implode('/',$current);
+				$current='/'.$current;
+				$this->Session->write('location',$current);
+			}
+		debug($this->Auth->user('username'));
 	}
 	
 

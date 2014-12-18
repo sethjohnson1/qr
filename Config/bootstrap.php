@@ -23,6 +23,7 @@ CakePlugin::load('ExtAuth');
 
 
 
+
 Configure::write('Dispatcher.filters', array(
 	'AssetDispatcher',
 	'CacheDispatcher'
