@@ -21,7 +21,7 @@ echo $this->Form->create('Template'); ?>
 		echo $this->Form->input('meta_desc');
 		echo $this->Form->input('nextid',array('label'=>'Next ID. Be sure that creator name matches!'));
 		//echo $this->Form->input('previd',array('label'=>'you do not need to fill this in, here for testing'));
-		echo $this->Form->input('code');
+		echo $this->Form->input('code',array('label'=>'Code. Only the Whitney needs to enter a number here'));
 	?>
 	</fieldset>
 <?php echo $this->Form->end(__('Submit')); ?>

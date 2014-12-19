@@ -11,13 +11,6 @@ class AssetsController extends AppController {
 		$this->set('assets', $this->Paginator->paginate());
 	}
 
-/**
- * view method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
 	public function view($id = null) {
 		if (!$this->Asset->exists($id)) {
 			throw new NotFoundException(__('Invalid asset'));
@@ -32,7 +25,7 @@ class AssetsController extends AppController {
 		if ($this->request->is('post')) {
 			if (isset($this->request->data['Asset']['vgaljson'])){
 				$vgal=json_decode($this->request->data['Asset']['vgaljson'],true);
-				//again, need to do this Delete after save somehow but this is Q&D
+				//again, would be ideal to do this Delete after save somehow but this is Q&D
 				$this->Asset->deleteAll(array('Asset.template_id'=>$id));
 				foreach (glob('img/uploads/'.$this->request->data['Asset']['template_id'].'_*') as $filename) unlink($filename);
 				//loop through treasures to save and copy image
@@ -126,6 +119,10 @@ class AssetsController extends AppController {
 					$this->Session->setFlash(__('File upload returned an error'));
 					break;
 				}
+				if ($this->request->data['Asset']['file']['type']!='image/jpeg'){
+					$this->Session->setFlash(__('File type must be JPG. Use the back button to resubmit'));
+					return false;
+				}
 				//debug($this->request->data['Asset']['file']);
 				$uuid=String::uuid();
 				$this->Asset->create();
@@ -138,8 +135,8 @@ class AssetsController extends AppController {
 				//need to set some logic for delete and unlink
 				
 				//remove all previously linked files
-				foreach (glob(APP.'uploads'.DS.$this->request->data['Asset']['template_id'].'_*') as $filename) unlink($filename);
-				if (move_uploaded_file($this->request->data['Asset']['file']['tmp_name'], APP.'uploads'.DS.$this->request->data['Asset']['template_id'].'_'.$uuid)){
+				foreach (glob('img/uploads/'.$this->request->data['Asset']['template_id'].'_*') as $filename) unlink($filename);
+				if (move_uploaded_file($this->request->data['Asset']['file']['tmp_name'], 'img/uploads/'.$this->request->data['Asset']['template_id'].'_'.$uuid.'.jpg')){
 					$this->Asset->deleteAll(array('Asset.template_id'=>$id));
 					if ($this->Asset->save($asset)) {
 						$this->Session->setFlash(__('The asset has been saved!'));

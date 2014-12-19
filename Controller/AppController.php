@@ -28,7 +28,18 @@ class AppController extends Controller {
 				$current='/'.$current;
 				$this->Session->write('location',$current);
 			}
-		debug($this->Auth->user('username'));
+		require_once(APP.'Vendor'.DS.'disqusapi/disqusapi.php');
+		$disqus = new DisqusAPI(Configure::read('disqusSecret'));
+		/*debug($disqus->posts->create(array(
+			//'forum'=>'centerofthewest',
+			'message'=>'test message',
+			'thread'=>1
+		
+		)));*/
+		//3340880605 is the id of forum: iscouttest thread:test1
+		$url="http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+		//don't enable this unless you want to make a thread for the url, eventually this will be somewhere else
+		//debug($disqus->threads->create(array('url'=>$url,'forum'=>'iscouttest','title'=>'test1','access_token'=>Configure::read('disqusAccessToken'))));
 	}
 	
 
