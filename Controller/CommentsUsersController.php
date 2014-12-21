@@ -56,54 +56,80 @@ class CommentsUsersController extends AppController {
 				$data['user_id']=$this->Auth->user('id');
 				$data['comment_id']=$id;
 				//this button should be disabled if they already upvoted, but we'll check the count here anyway
-				$comment=$this->CommentsUser->find('first',array(
+				$commentuser=$this->CommentsUser->find('first',array(
 					'conditions'=>array('CommentsUser.comment_id'=>$id,'CommentsUser.user_id'=>$this->Auth->user('id')),
 					'recursive'=>-1
 				));
+				$commentdata=$this->CommentsUser->Comment->find('first',array(
+				'recursive'=>-1,
+				'conditions'=>array('Comment.id'=>$id)
+				
+				));
 				$this->CommentsUser->create();
-				if(!empty($comment)){
-					if ($vote==1 && $comment['CommentsUser']['upvoted']!=true){
-						$data['id']=$comment['CommentsUser']['id'];
+				if(!empty($commentuser)){
+					if ($vote==1 && $commentuser['CommentsUser']['upvoted']!=true){
+						$data['id']=$commentuser['CommentsUser']['id'];
+						//means we're reversing direction
+						if ($commentuser['CommentsUser']['downvoted']==true){
+							$data['upvoted']=false;
+							$data['downvoted']=false;
+							$commentdata['Comment']['downvotes']=$commentdata['Comment']['downvotes']-1;
+						}
+						else {
+							$commentdata['Comment']['upvotes']=$commentdata['Comment']['upvotes']+1;
+							unset($commentdata['Comment']['downvotes']);
+							$data['upvoted']=true;
+						}
 						//$data['vote']=1;
 					}
-					else if ($vote==-1 && $comment['CommentsUser']['downvoted']!=true){
-						$data['id']=$comment['CommentsUser']['id'];
-						//$data['vote']=$comment['CommentsUser']['vote']-1;
+					else if ($vote==-1 && $commentuser['CommentsUser']['downvoted']!=true){
+						$data['id']=$commentuser['CommentsUser']['id'];
+							if ($commentuser['CommentsUser']['upvoted']==true){
+								$data['upvoted']=false;
+								$data['downvoted']=false;
+								$commentdata['Comment']['upvotes']=$commentdata['Comment']['upvotes']-1;
+							}
+							else {
+								$commentdata['Comment']['downvotes']=$commentdata['Comment']['downvotes']+1;
+								unset($commentdata['Comment']['upvotes']);
+								$data['downvoted']=true;
+							}
 					}
 					else {
 						//they have already voted this way or something else is wrong
 						return false;
+						//just for testing
+					//	debug('throw out!');
+						//$data['id']=$commentuser['CommentsUser']['id'];
+					}
+				}
+				//comment is empty
+				else {
+					if ($vote==1){ 
+						$data['upvoted']=true;
+						$data['already_upvoted']=true;
+						$commentdata['Comment']['upvotes']=$commentdata['Comment']['upvotes']+1;
+						unset($commentdata['Comment']['downvotes']);
+					}
+					if ($vote==-1){
+						$data['downvoted']=1;
+						$data['already_downvoted']=1;
+						$commentdata['Comment']['downvotes']=$commentdata['Comment']['downvotes']+1;
+						unset($commentdata['Comment']['upvotes']);
 					}
 				}
 
-				if ($vote==1) $data['upvoted']=true;
-				if ($vote==1 && $comment['CommentsUser']['downvoted']==true){
-					$data['upvoted']=false;
-					$data['downvoted']=false;
-
-				}
 				
-				if ($vote==-1) $data['downvoted']=1;
-				if ($vote==-1 && $comment['CommentsUser']['upvoted']==true){
-					$data['upvoted']=false;
-					$data['downvoted']=false;
-
-				}
-				//debug($comment);
+				
+				//debug($commentdata);
 				if($this->CommentsUser->save($data)){
 					//update the actual comment with the new total
-					$commentdata=$this->CommentsUser->Comment->find('first',array('recursive'=>-1));
-					//debug($commentdata);
-					if ($vote==1 && is_null($comment['CommentsUser']['upvoted'])) 
-						$commentdata['Comment']['upvotes']=$commentdata['Comment']['upvotes']+1;
-					if ($vote==-1 && is_null($comment['CommentsUser']['downvoted'])) 
-						$commentdata['Comment']['downvotes']=$commentdata['Comment']['downvotes']+1;
-
 					$this->CommentsUser->Comment->create();
+						//this should be inside IF to avoid altogether if not flagged
 					$commentdata['Comment']['id']=$id;
 					//debug($commentdata);
-					if ($this->CommentsUser->Comment->save($commentdata)){
-
+					if ($this->CommentsUser->Comment->save($commentdata['Comment'])){
+						debug('saved');
 					}
 
 				}
