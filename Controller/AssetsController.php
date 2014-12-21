@@ -117,7 +117,7 @@ class AssetsController extends AppController {
 				$asset=array();
 				if ($this->request->data['Asset']['file']['error']!=0){
 					$this->Session->setFlash(__('File upload returned an error'));
-					break;
+					return false;
 				}
 				if ($this->request->data['Asset']['file']['type']!='image/jpeg'){
 					$this->Session->setFlash(__('File type must be JPG. Use the back button to resubmit'));

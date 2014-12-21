@@ -1,20 +1,20 @@
 <div class="templates view">
 <?
-//begin disqus work...
-	echo $this->Form->create('dComment');
+//abandoning disqus to do it myself, their API is too annoying
+//eventually I hope to make this into a plugin and put it into OC
+	echo $this->Form->create('sComment');
 	//echo $this->Form->input('vgalid');
-	echo $this->Form->input('comment',array('id'=>'jsoncomment','type'=>'textarea'));	
-	//echo $this->Form->input('response',array('id'=>'response','type'=>'textarea'));	
-	echo $this->Form->input('Ajax the mofo',array('type'=>'button','id'=>'commentbutton','label'=>false));	
+	echo $this->Form->input('comment',array('type'=>'textarea'));		
+	echo $this->Form->input('Add',array('type'=>'button','id'=>'comment_add','label'=>false));	
 	echo $this->Form->input('url',array('value'=>"http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'],'type'=>'hidden'));
 	//echo $this->Form->submit('Submit');
 	echo $this->Form->end(); 
-	
-	$data = $this->Js->get('#dCommentViewForm')->serializeForm(array('isForm' => true, 'inline' => true));
-	$this->Js->get('#commentbutton')->event(
+
+	$data = $this->Js->get('#sCommentViewForm')->serializeForm(array('isForm' => true, 'inline' => true));
+	$this->Js->get('#comment_add')->event(
         'click', $this->Js->request(
-            array('controller' => 'templates', 'action' => 'commentbutton'), array(
-				'update' => '#response',
+            array('controller' => 'commentsUsers', 'action' => 'comment_add'), array(
+				'update' => '#comments',
 				'async' => true,
 				'data'=>$data,
 				'dataExpression'=>true,
@@ -25,7 +25,9 @@
     
 	echo $this->Js->writeBuffer();
 	?>
-	<div id="response" style="height: 300px; width:500px; border: solid black; padding: 12px 12px 12px 12px"></div>
+	<div id="comments" style="height: 300px; width:500px; border: solid black; padding: 12px 12px 12px 12px">
+		<p>this is some text here</p>
+	</div>
 	<?
 
 

@@ -1,18 +1,19 @@
 <?php
 App::uses('AppModel', 'Model');
 /**
- * Comment Model
+ * CommentsUser Model
  *
  * @property User $User
+ * @property Comment $Comment
  */
-class Comment extends AppModel {
+class CommentsUser extends AppModel {
 
 /**
  * Display field
  *
  * @var string
  */
-	public $displayField = 'thoughts';
+	public $displayField = 'user_id';
 
 
 	//The Associations below have been created with all possible keys, those that are not needed can be removed
@@ -29,22 +30,13 @@ class Comment extends AppModel {
 			'conditions' => '',
 			'fields' => '',
 			'order' => ''
-		)
-	);
-	
-	public $hasAndBelongsToMany = array(
-		'User' => array(
-			'className' => 'User',
-			'joinTable' => 'comments_users',
-			'foreignKey' => 'user_id',
-			'associationForeignKey' => 'comment_id',
-			'unique' => 'keepExisting',
+		),
+		'Comment' => array(
+			'className' => 'Comment',
+			'foreignKey' => 'comment_id',
 			'conditions' => '',
 			'fields' => '',
-			'order' => '',
-			'limit' => '',
-			'offset' => '',
-			'finderQuery' => '',
+			'order' => ''
 		)
 	);
 }

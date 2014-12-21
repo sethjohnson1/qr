@@ -25,8 +25,23 @@ create table users(
 	picture varchar(255)
 );
 
+-- for tracking user interaction with comments, not to be confused with the one-to-many relationship between users and their own comments
+drop table if exists comments_users;
+create table comments_users(
+	id int not null auto_increment,
+	primary key(id),
+	user_id int,
+	comment_id int,
+	created datetime,
+	modified datetime,
+	rating int,
+	vote int, -- this will be -1, 0, or 1
+	flagged tinyint(1)
+);
+
+
 drop table if exists comments;
-create table comments(
+/* create table comments(
 	id int not null auto_increment,
 	primary key(id),
 	thoughts text, -- because the word 'comment' is reserved
@@ -36,6 +51,23 @@ create table comments(
 	user_id int,
 	hidden tinyint(1),
 	flagged int -- this is a number so we can count number of flags, maybe shut it down after so many
+);
+*/
+-- expermineting with new structure
+create table comments(
+	id int not null auto_increment, -- maybe this should be a UUID
+	primary key(id),
+	thoughts text, -- because the word 'comment' is reserved
+	rating int,
+	created datetime,
+	modified datetime,
+	user_id int,
+	parent_id int, -- maybe not threaded but just in case, should probably max at 3
+	hidden tinyint(1),
+	flags int, -- this is a number so we can count number of flags, maybe shut it down after so many
+	upvotes int,
+	downvotes int,
+	visible tinyint(1)
 );
 
 drop table if exists templates;
