@@ -119,17 +119,12 @@ class CommentsUsersController extends AppController {
 					}
 				}
 
-				
-				
-				//debug($commentdata);
 				if($this->CommentsUser->save($data)){
 					//update the actual comment with the new total
 					$this->CommentsUser->Comment->create();
-						//this should be inside IF to avoid altogether if not flagged
 					$commentdata['Comment']['id']=$id;
-					//debug($commentdata);
 					if ($this->CommentsUser->Comment->save($commentdata['Comment'])){
-						debug('saved');
+						//all is saved, could do something here if needed
 					}
 
 				}
@@ -138,7 +133,6 @@ class CommentsUsersController extends AppController {
 					'conditions'=>array('Comment.template_id'=>$templateid),
 					'recursive'=>-1
 					));
-						//debug($comments);
 				$this->set('comments',$comments);
 				$this->render('comment_add','ajax');
 			}
