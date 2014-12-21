@@ -25,18 +25,14 @@ class TemplatesController extends AppController {
 
 
 	public function view($id = null) {
-		debug("http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
-		//begin the long pathway to disqus
-		if ($this->request->is('post')) {
-			
-		}
-	
-	
 		if (!$this->Template->exists($id)) {
 			throw new NotFoundException(__('Invalid template'));
 		}
 		$options = array('conditions' => array('Template.' . $this->Template->primaryKey => $id));
 		$this->set('template', $this->Template->find('first', $options));
+		$this->set('id',$id);
+		$user=$this->Auth->user();
+		if (isset($user)) $this->set('user',$user);
 	}
 	
 	public function commentbutton() {

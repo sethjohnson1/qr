@@ -2,18 +2,21 @@
 <?
 //abandoning disqus to do it myself, their API is too annoying
 //eventually I hope to make this into a plugin and put it into OC
+// only display if Auth
+if ($user){
 	echo $this->Form->create('sComment');
 	//echo $this->Form->input('vgalid');
 	echo $this->Form->input('comment',array('type'=>'textarea'));		
+	//echo $this->Form->input('rating',array('type'=>'number'));		
 	echo $this->Form->input('Add',array('type'=>'button','id'=>'comment_add','label'=>false));	
-	echo $this->Form->input('url',array('value'=>"http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'],'type'=>'hidden'));
+	
 	//echo $this->Form->submit('Submit');
 	echo $this->Form->end(); 
 
 	$data = $this->Js->get('#sCommentViewForm')->serializeForm(array('isForm' => true, 'inline' => true));
 	$this->Js->get('#comment_add')->event(
         'click', $this->Js->request(
-            array('controller' => 'commentsUsers', 'action' => 'comment_add'), array(
+            array('controller' => 'commentsUsers', 'action' => 'comment_add',$id), array(
 				'update' => '#comments',
 				'async' => true,
 				'data'=>$data,
@@ -24,6 +27,8 @@
     );
     
 	echo $this->Js->writeBuffer();
+ }
+ else echo 'you must login to comment';
 	?>
 	<div id="comments" style="height: 300px; width:500px; border: solid black; padding: 12px 12px 12px 12px">
 		<p>this is some text here</p>

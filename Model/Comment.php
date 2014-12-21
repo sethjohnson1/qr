@@ -29,8 +29,16 @@ class Comment extends AppModel {
 			'conditions' => '',
 			'fields' => '',
 			'order' => ''
+		),
+		'Template' => array(
+			'className' => 'Template',
+			'foreignKey' => 'template_id',
+			'conditions' => '',
+			'fields' => '',
+			'order' => ''
 		)
 	);
+
 	
 	public $hasAndBelongsToMany = array(
 		'User' => array(

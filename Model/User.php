@@ -1,17 +1,8 @@
 <?php
 App::uses('AppModel', 'Model');
-/**
- * User Model
- *
- * @property Comment $Comment
- */
+
 class User extends AppModel {
 
-/**
- * Display field
- *
- * @var string
- */
 	public $displayField = 'name';
 
 

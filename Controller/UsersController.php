@@ -20,6 +20,14 @@ class UsersController extends AppController {
 		$this->set('user', $this->User->find('first', $options));
 	}
 	
+	//just here for testing
+	public function dummyAuth($id){
+		$user['id']=$id;
+		$user['username']='sethtest'.$id;
+		$this->Auth->login($user);
+		//$this->redirect($this->referer());
+	}
+	
 	//now for the ExtAuth stuff
 	
 	public function auth_login($provider) {
