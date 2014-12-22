@@ -3,17 +3,82 @@ App::uses('AppController', 'Controller');
 
 class CommentsUsersController extends AppController {
 
-	public $components = array('Paginator');
+	public $components = array('Paginator','Comment');
 	
+	//$id is the id of the Comment
+	//$flag is whether to flag or unflag (1, -1)
+	public function comment_flag($id = null,$templateid=null,$flag=null) {
+		//if ($this->request->is('ajax')){
+			if ($this->Auth->user()){
+				$user=$this->Auth->user();
+				$commentsuser=$this->CommentsUser->find('first',array(
+					'recursive'=>-1,
+					'conditions'=>array('CommentsUser.comment_id'=>$id,'CommentsUser.user_id'=>$user['id'])
+				));
+				$this->CommentsUser->create();
+				
+				if (isset($commentsuser['CommentsUser']['id'])){
+					$data['id']=$commentsuser['CommentsUser']['id'];
+					//do nothing if same choice
+					if ($commentsuser['CommentsUser']['flagged'] == true && $flag==1) return false;
+					if ($commentsuser['CommentsUser']['flagged'] == false && $flag==-1) return false;
+				}
+				
+				
+				$data['user_id']=$user['id'];
+				$data['comment_id']=$id;
+				if ($flag==1) $data['flagged']=true;
+				if ($flag==-1) $data['flagged']=false;
+				if ($this->CommentsUser->save($data)){
+					$this->CommentsUser->Comment->create();
+					$commentdata=$this->CommentsUser->Comment->find('first',array(
+						'conditions'=>array('Comment.id'=>$id),
+						'recursive'=>-1
+					));
+					$commentdata['Comment']['flags']=$commentdata['Comment']['flags']+$flag;
+					//$commentdata['id']=$id;
+					debug($commentdata['Comment']['flags']);
+					/*if ($this->CommentsUser->Comment->save($commentdata)){
+					
+					}
+					*/
+					
+					//call the component
+					$comments=$this->Comment->getComments($templateid);
+					$usercomments=$this->Comment->userComment($templateid,$user['id']);
+					$this->set(compact('comments','usercomments'));
+					$this->render('comment_add','ajax');
+				}
+				
+				
+			}
+			else {
+				echo 'you must be logged in to do this';
+				$this->render(false,'ajax');
+			}
+		//}
+	}
+	
+	//$id is the id of the Template
 	public function comment_add($id = null, $parentid=null) {
 	//technically this should be on the Comment controller, as the junc table has nothing to do with add
 	//but for now I just leave it..
 	//be sure to turn this on in production
 		//if ($this->request->is('ajax')){
 			if ($this->Auth->user()){
-			//debug($this->request->data);
-				$uuid=String::uuid();
-				$comment['id']=$uuid;
+				$user=$this->Auth->user();
+				//first see if this is an existing comment
+				$commentdata=$this->CommentsUser->Comment->find('first',array(
+					'recursive'=>-1,
+					'conditions'=>array('Comment.template_id'=>$id,'Comment.user_id'=>$user['id'])
+				));
+				if (isset($commentdata['Comment']['id'])){
+					$comment['id']=$commentdata['Comment']['id'];
+				}
+				else {
+					$uuid=String::uuid();
+					$comment['id']=$uuid;
+				}
 				$comment['thoughts']=$this->request->data['sComment']['comment'];
 				if(isset($comment['rating'])) $comment['rating']=$this->request->data['sComment']['rating'];
 				$comment['user_id']=$this->Auth->user('id');
@@ -22,25 +87,12 @@ class CommentsUsersController extends AppController {
 				$comment['visible']=1;
 				$this->CommentsUser->Comment->create();
 				if ($this->CommentsUser->Comment->save($comment)){
-					//if that worked, find all the comments again for the view
-					//this should be paginated, for now just finding them
-					//and then it will be a basic mirror of the find on the CommentController
-					$comments=$this->CommentsUser->Comment->find('all',array(
-					'conditions'=>array('Comment.template_id'=>$id),
-					'recursive'=>-1
-					));
-					
+					//Comment component..
+					$comments=$this->Comment->getComments($id);
+					$usercomments=$this->Comment->userComment($id,$user['id']);
+					$this->set(compact('comments','usercomments'));
+					$this->render('comment_add','ajax');
 				}
-				//this find is just to make testing easier
-				$comments=$this->CommentsUser->Comment->find('all',array(
-					'conditions'=>array('Comment.template_id'=>$id),
-					'recursive'=>-1
-					));
-				$this->set('comments', $comments);
-				//$this->render('comment_add', 'ajax');
-				$this->layout = false;
-				//$this->render('comment_add');
-				//eventually we'll need something like 'inline' layout
 			}
 			else {
 				echo 'you must be logged in to do this';
@@ -50,9 +102,13 @@ class CommentsUsersController extends AppController {
 	}	
 	
 	//this upvotes and downvotes
+	//$id is the comment id
 	public function comment_up($id = null, $templateid=null, $vote=null) {
 		//if ($this->request->is('ajax')){
 			if ($this->Auth->user()){
+				//eventually want to add counts to user, moving on for now
+				// (i left everything in place, but it doesn't work right)
+				$user=$this->Auth->user();
 				$data['user_id']=$this->Auth->user('id');
 				$data['comment_id']=$id;
 				//this button should be disabled if they already upvoted, but we'll check the count here anyway
@@ -68,6 +124,8 @@ class CommentsUsersController extends AppController {
 				$this->CommentsUser->create();
 				if(!empty($commentuser)){
 					if ($vote==1 && $commentuser['CommentsUser']['upvoted']!=true){
+						$user['upvotes']=$user['upvotes']+1;
+						unset($user['downvotes']);
 						$data['id']=$commentuser['CommentsUser']['id'];
 						//means we're reversing direction
 						if ($commentuser['CommentsUser']['downvoted']==true){
@@ -77,12 +135,16 @@ class CommentsUsersController extends AppController {
 						}
 						else {
 							$commentdata['Comment']['upvotes']=$commentdata['Comment']['upvotes']+1;
+							//$user['upvotes']=$user['upvotes']+1;
 							unset($commentdata['Comment']['downvotes']);
 							$data['upvoted']=true;
 						}
 						//$data['vote']=1;
 					}
 					else if ($vote==-1 && $commentuser['CommentsUser']['downvoted']!=true){
+						$user['downvotes']=$user['downvotes']+1;
+						unset($user['upvotes']);
+						//debug($user);
 						$data['id']=$commentuser['CommentsUser']['id'];
 							if ($commentuser['CommentsUser']['upvoted']==true){
 								$data['upvoted']=false;
@@ -109,12 +171,16 @@ class CommentsUsersController extends AppController {
 						$data['upvoted']=true;
 						$data['already_upvoted']=true;
 						$commentdata['Comment']['upvotes']=$commentdata['Comment']['upvotes']+1;
+						$user['upvotes']=$user['upvotes']+1;
+						unset($user['downvotes']);
 						unset($commentdata['Comment']['downvotes']);
 					}
 					if ($vote==-1){
 						$data['downvoted']=1;
 						$data['already_downvoted']=1;
 						$commentdata['Comment']['downvotes']=$commentdata['Comment']['downvotes']+1;
+						//$user['downvotes']=$user['downvotes']+1;
+						unset($user['upvotes']);
 						unset($commentdata['Comment']['upvotes']);
 					}
 				}
@@ -124,17 +190,20 @@ class CommentsUsersController extends AppController {
 					$this->CommentsUser->Comment->create();
 					$commentdata['Comment']['id']=$id;
 					if ($this->CommentsUser->Comment->save($commentdata['Comment'])){
-						//all is saved, could do something here if needed
+						$comments=$this->Comment->getComments($templateid);
+						$usercomments=$this->Comment->userComment($templateid,$user['id']);
+						$this->set(compact('comments','usercomments'));
+						//debug
+						$this->render('comment_add','ajax');
+						/* //would save the counts here
+						if ($this->CommentsUser->User->save($user)){
+							//wow, it all went through... (and component call would be in here)
+						}
+						*/
 					}
 
 				}
-				//$this->layout = false;
-				$comments=$this->CommentsUser->Comment->find('all',array(
-					'conditions'=>array('Comment.template_id'=>$templateid),
-					'recursive'=>-1
-					));
-				$this->set('comments',$comments);
-				$this->render('comment_add','ajax');
+					
 			}
 			else {
 				echo 'you must be logged in to do this';

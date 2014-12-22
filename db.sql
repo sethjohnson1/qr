@@ -22,7 +22,12 @@ create table users(
 	username varchar(255),
 	gender varchar(10),
 	locale varchar(10),
-	picture varchar(255)
+	picture varchar(255),
+	flags int,
+	upvotes int,
+	downvotes int,
+	avgrating int -- long way off, but calculate their average rating of stuff
+	
 );
 
 -- for tracking user interaction with comments, not to be confused with the one-to-many relationship between users and their own comments

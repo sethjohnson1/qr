@@ -15,7 +15,7 @@ class TemplatesController extends AppController {
 		$this->set(compact('templates','locations'));
 		//$this->set('templates',$templates);
 	}
-	public $components = array('Paginator');
+	public $components = array('Paginator','Comment');
 
 
 	public function index() {
@@ -29,10 +29,17 @@ class TemplatesController extends AppController {
 			throw new NotFoundException(__('Invalid template'));
 		}
 		$options = array('conditions' => array('Template.' . $this->Template->primaryKey => $id));
-		$this->set('template', $this->Template->find('first', $options));
+		$template=$this->Template->find('first', $options);
 		$this->set('id',$id);
 		$user=$this->Auth->user();
 		if (isset($user)) $this->set('user',$user);
+		
+		//user Comments component to load up view variables
+		$comments=$this->Comment->getComments($id);
+		$usercomments=$this->Comment->userComment($id,$user['id']);
+		
+		//debug($usercomments);
+		$this->set(compact('comments','template','usercomments'));
 	}
 	
 	public function commentbutton() {

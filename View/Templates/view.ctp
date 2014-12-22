@@ -3,10 +3,17 @@
 //abandoning disqus to do it myself, their API is too annoying
 //eventually I hope to make this into a plugin and put it into OC
 // only display if Auth
-if ($user){
+
+/*
+
+*/
+debug($usercomments);
+if (isset($user)){
 	echo $this->Form->create('sComment');
 	//echo $this->Form->input('vgalid');
-	echo $this->Form->input('comment',array('type'=>'textarea'));		
+	if (isset($usercomments['Comment']['thoughts'])) $thoughts=$usercomments['Comment']['thoughts'];
+	else $thoughts='';
+	echo $this->Form->input('comment',array('type'=>'textarea','value'=>$thoughts));		
 	//echo $this->Form->input('rating',array('type'=>'number'));		
 	echo $this->Form->input('Add',array('type'=>'button','id'=>'comment_add','label'=>false));	
 	
@@ -30,8 +37,10 @@ if ($user){
  }
  else echo 'you must login to comment';
 	?>
-	<div id="comments" style="height: 300px; width:500px; border: solid black; padding: 12px 12px 12px 12px">
-		<p>this is some text here</p>
+	<div id="comments" style="width:500px; border: solid black; padding: 12px 12px 12px 12px">
+		<? echo $this->element('commentswidget',array($comments,$usercomments)); 
+		
+		?>
 	</div>
 	<?
 

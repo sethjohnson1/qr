@@ -22,8 +22,14 @@ class UsersController extends AppController {
 	
 	//just here for testing
 	public function dummyAuth($id){
+		$fuser=$this->User->findById(5);
 		$user['id']=$id;
 		$user['username']='sethtest'.$id;
+		$user['upvotes']=null;
+		$user['downvotes']=null;
+		$user['flagged']=null;
+		
+		//$this->Auth->login($fuser['User']);
 		$this->Auth->login($user);
 		//$this->redirect($this->referer());
 	}
