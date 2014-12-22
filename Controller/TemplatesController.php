@@ -33,13 +33,11 @@ class TemplatesController extends AppController {
 		$this->set('id',$id);
 		$user=$this->Auth->user();
 		if (isset($user)) $this->set('user',$user);
-		
+		//$usercomments=$this->Template->Comment->find('first',array('conditions'=>array()));
 		//user Comments component to load up view variables
-		$comments=$this->Comment->getComments($id);
-		$usercomments=$this->Comment->userComment($id,$user['id']);
-		
+		$comments=$this->Comment->getComments($id,$user['id']);
 		//debug($usercomments);
-		$this->set(compact('comments','template','usercomments'));
+		$this->set(compact('comments','template'));
 	}
 	
 	public function commentbutton() {

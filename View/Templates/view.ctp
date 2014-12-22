@@ -1,16 +1,8 @@
 <div class="templates view">
 <?
-//abandoning disqus to do it myself, their API is too annoying
-//eventually I hope to make this into a plugin and put it into OC
-// only display if Auth
-
-/*
-
-*/
-debug($usercomments);
 if (isset($user)){
 	echo $this->Form->create('sComment');
-	//echo $this->Form->input('vgalid');
+	//this DOES NOT WORK any longer but I am waiting until the view is finished before I worry too much
 	if (isset($usercomments['Comment']['thoughts'])) $thoughts=$usercomments['Comment']['thoughts'];
 	else $thoughts='';
 	echo $this->Form->input('comment',array('type'=>'textarea','value'=>$thoughts));		
@@ -38,7 +30,7 @@ if (isset($user)){
  else echo 'you must login to comment';
 	?>
 	<div id="comments" style="width:500px; border: solid black; padding: 12px 12px 12px 12px">
-		<? echo $this->element('commentswidget',array($comments,$usercomments)); 
+		<? echo $this->element('commentswidget',array($comments,$user)); 
 		
 		?>
 	</div>

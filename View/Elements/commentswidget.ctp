@@ -4,16 +4,18 @@ foreach ($comments as $comment){
 	$mine=0;
 	$upvoted=false;
 	$downvoted=false;
-	//debug($usercomments);
-	if (isset($usercomments['CommentsUser']['id']) && $comment['Comment']['id']==$usercomments['CommentsUser']['comment_id']){
-		//we are at this users comment, so here is where logic of how to draw buttons is derived
-		$mine=1;
-		$flagged=$usercomments['CommentsUser']['flagged'];
-		$upvoted=$usercomments['CommentsUser']['upvoted'];
-		$downvoted=$usercomments['CommentsUser']['downvoted'];
-		//debug($flagged);
+	if ($comment['Comment']['user_id']==$user['id']) $mine=1;
+	if (isset($comment['CommentsUser']['id'])){
+		//the user has interacted with this comment, set some useful variables
+		$flagged=$comment['CommentsUser']['flagged'];
+		$upvoted=$comment['CommentsUser']['upvoted'];
+		$downvoted=$comment['CommentsUser']['downvoted'];
+		//see if its their own comment
 	}
-	echo '<div style="border: 1px double green">';
+		//skip altogether if hidden
+		
+		if ($mine==1) echo '<div style="border: 1px double blue">';
+		else echo '<div style="border: 1px double green">';
 		echo $this->Form->create($comment['Comment']['id']);
 		//echo $this->Form->input('comment',array('type'=>'textarea'));		
 		//echo $this->Form->input('rating',array('type'=>'number'));
@@ -38,9 +40,16 @@ foreach ($comments as $comment){
 			$flaglabel='Flag';
 		}
 		echo $this->Form->input($flaglabel,array('div'=>false,'type'=>'button',
-		'id'=>'comment_flag'.$comment['Comment']['id'],'label'=>false
+			'id'=>'comment_flag'.$comment['Comment']['id'],'label'=>false
 		
 		));
+		
+		if ($mine==1){
+			echo $this->Form->input('Delete my Comment',array(
+			'div'=>true,'label'=>false,
+			'type'=>'button','id'=>'comment_hide'.$comment['Comment']['id']
+		));	
+		}
 
 	//not sure even want to bother with nested. If so, it should be limited to 2 levels deep	
 		//echo $this->Form->input('Reply',array('type'=>'button','id'=>'comment_reply'.$comment['Comment']['id'],'label'=>false));	
@@ -73,7 +82,6 @@ foreach ($comments as $comment){
 				)
 		);
 		
-		if ($flagged==false) $flagvalue=1;
 		$this->Js->get('#comment_flag'.$comment['Comment']['id'])->event(
 			'click', $this->Js->request(
 				array('controller' => 'commentsUsers', 'action' => 'comment_flag',$comment['Comment']['id'],$comment['Comment']['template_id'],$flagvalue), array(
@@ -85,6 +93,21 @@ foreach ($comments as $comment){
 					)
 				)
 		);
+		
+		if ($mine==1){
+			$this->Js->get('#comment_hide'.$comment['Comment']['id'])->event(
+				'click', $this->Js->request(
+					array('controller' => 'commentsUsers', 'action' => 'comment_hide',$comment['Comment']['id']), array(
+						'update' => '#comments',
+						'async' => true,
+						'data'=>$data,
+						'dataExpression'=>true,
+						'method'=>'POST'
+						)
+					)
+			);
+		}
+		
 		
 		echo $this->Js->writeBuffer();
 		$total=$comment['Comment']['upvotes']-$comment['Comment']['downvotes'];
