@@ -97,9 +97,11 @@ class CommentsUsersController extends AppController {
 				//eventually want to add counts to user, moving on for now
 				// (i left everything in place, but it doesn't work right)
 				$user=$this->Auth->user();
+				debug($user);
 				$data['user_id']=$this->Auth->user('id');
 				$data['comment_id']=$id;
 				//this button should be disabled if they already upvoted, but we'll check the count here anyway
+				//this is flawed because what if.. yeah
 				$commentuser=$this->CommentsUser->find('first',array(
 					'conditions'=>array('CommentsUser.comment_id'=>$id,'CommentsUser.user_id'=>$this->Auth->user('id')),
 					'recursive'=>-1
@@ -110,38 +112,44 @@ class CommentsUsersController extends AppController {
 				
 				));
 				$this->CommentsUser->create();
+				//THIS IS WHERE I LEFT OFF
+				// the problem is that Auth does not refresh on these Ajax calls, so it keeps getting set to null
 				if(!empty($commentuser)){
 					if ($vote==1 && $commentuser['CommentsUser']['upvoted']!=true){
-						$user['upvotes']=$user['upvotes']+1;
-						unset($user['downvotes']);
 						$data['id']=$commentuser['CommentsUser']['id'];
 						//means we're reversing direction
 						if ($commentuser['CommentsUser']['downvoted']==true){
+							debug('subtract one');
 							$data['upvoted']=false;
 							$data['downvoted']=false;
 							$commentdata['Comment']['downvotes']=$commentdata['Comment']['downvotes']-1;
+							debug($user['downvotes']);
+							$user['downvotes']=$user['downvotes']-1;
+							debug($user['downvotes']);
 						}
 						else {
 							$commentdata['Comment']['upvotes']=$commentdata['Comment']['upvotes']+1;
-							//$user['upvotes']=$user['upvotes']+1;
+							$user['upvotes']=$user['upvotes']+1;
 							unset($commentdata['Comment']['downvotes']);
+							unset($user['downvotes']);
 							$data['upvoted']=true;
 						}
 						//$data['vote']=1;
 					}
 					else if ($vote==-1 && $commentuser['CommentsUser']['downvoted']!=true){
-						$user['downvotes']=$user['downvotes']+1;
-						unset($user['upvotes']);
-						//debug($user);
 						$data['id']=$commentuser['CommentsUser']['id'];
 							if ($commentuser['CommentsUser']['upvoted']==true){
 								$data['upvoted']=false;
 								$data['downvoted']=false;
 								$commentdata['Comment']['upvotes']=$commentdata['Comment']['upvotes']-1;
+								$user['upvotes']=$user['upvotes']-1;
+								//debug($user);
 							}
 							else {
 								$commentdata['Comment']['downvotes']=$commentdata['Comment']['downvotes']+1;
+								$user['downvotes']=$user['downvotes']+1;
 								unset($commentdata['Comment']['upvotes']);
+								unset($user['upvotes']);
 								$data['downvoted']=true;
 							}
 					}
@@ -160,15 +168,15 @@ class CommentsUsersController extends AppController {
 						$data['already_upvoted']=true;
 						$commentdata['Comment']['upvotes']=$commentdata['Comment']['upvotes']+1;
 						$user['upvotes']=$user['upvotes']+1;
-						unset($user['downvotes']);
+						//unset($user['downvotes']);
 						unset($commentdata['Comment']['downvotes']);
 					}
 					if ($vote==-1){
 						$data['downvoted']=1;
 						$data['already_downvoted']=1;
 						$commentdata['Comment']['downvotes']=$commentdata['Comment']['downvotes']+1;
-						//$user['downvotes']=$user['downvotes']+1;
-						unset($user['upvotes']);
+						$user['downvotes']=$user['downvotes']+1;
+						//unset($user['upvotes']);
 						unset($commentdata['Comment']['upvotes']);
 					}
 				}
@@ -180,13 +188,12 @@ class CommentsUsersController extends AppController {
 					if ($this->CommentsUser->Comment->save($commentdata['Comment'])){
 						$comments=$this->Comment->getComments($templateid,$user['id']);
 						$this->set(compact('comments','user'));
-						//debug
 						$this->render('comment_add','ajax');
-						/* //would save the counts here
+						 //would save the counts here
 						if ($this->CommentsUser->User->save($user)){
 							//wow, it all went through... (and component call would be in here)
 						}
-						*/
+						
 					}
 
 				}

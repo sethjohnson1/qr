@@ -37,6 +37,14 @@ class CommentComponent extends Component {
 		$result=array_merge($comment,$comment2);
 		return $result;
 	}
-
+	
+	public function userComment ($templateid, $userid){
+		$model=ClassRegistry::init('Comment');
+		$options['conditions']=array('Comment.template_id'=>$templateid,'Comment.user_id'=>$userid);
+		$options['recursive']=-1;
+		//should only return one record
+		$result=$model->find('first',$options);
+		return $result;
+	}
 		
 }

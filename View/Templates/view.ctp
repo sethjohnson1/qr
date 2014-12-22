@@ -2,11 +2,10 @@
 <?
 if (isset($user)){
 	echo $this->Form->create('sComment');
-	//this DOES NOT WORK any longer but I am waiting until the view is finished before I worry too much
-	if (isset($usercomments['Comment']['thoughts'])) $thoughts=$usercomments['Comment']['thoughts'];
+	if (isset($usercomment['Comment']['thoughts'])) $thoughts=$usercomment['Comment']['thoughts'];
 	else $thoughts='';
 	echo $this->Form->input('comment',array('type'=>'textarea','value'=>$thoughts));		
-	//echo $this->Form->input('rating',array('type'=>'number'));		
+	echo $this->Form->input('rating',array('type'=>'number'));		
 	echo $this->Form->input('Add',array('type'=>'button','id'=>'comment_add','label'=>false));	
 	
 	//echo $this->Form->submit('Submit');
@@ -27,9 +26,13 @@ if (isset($user)){
     
 	echo $this->Js->writeBuffer();
  }
- else echo 'you must login to comment';
+ else {
+ 
+	echo 'you must login to comment';
+	$user=null;
+ }
 	?>
-	<div id="comments" style="width:500px; border: solid black; padding: 12px 12px 12px 12px">
+	<div id="comments" style="border: solid black; padding: 12px 12px 12px 12px">
 		<? echo $this->element('commentswidget',array($comments,$user)); 
 		
 		?>
