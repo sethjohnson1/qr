@@ -38,7 +38,20 @@ class CommentComponent extends Component {
 		
 		$comment=$model->find('all',$options);
 		
-		return $comment;
+		$options['joins']= array(
+			array(
+				'table' => 'comments',
+				'alias' => 'Comment1',
+				'type' => 'LEFT OUTER',
+				'conditions'=>array('CommentsUser.comment_id = Comment1.id','Comment1.template_id'=>$templateid)
+		
+		));
+		$options['recursive']=0;
+		$options['conditions']=array('CommentsUser.user_id !='.$userid,'Comment.template_id'=>$templateid);
+		
+		$comment2=$model->find('all',$options);
+		
+		return $comment2;
 		
 		/*
 		$comment=$model->find('all',array(
