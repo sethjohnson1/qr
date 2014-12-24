@@ -10,7 +10,7 @@ class CommentsUsersController extends AppController {
 	public function comment_flag($id = null,$templateid=null,$flag=null) {
 		//if ($this->request->is('ajax')){
 			if ($this->Auth->user()){
-				$user=$this->Auth->user();
+				//$user=$this->CommentsUser->User->find('first',array('conditions'=>array('User.id'=>$this->Auth->user('id'))));
 				$commentsuser=$this->CommentsUser->find('first',array(
 					'recursive'=>-1,
 					'conditions'=>array('CommentsUser.comment_id'=>$id,'CommentsUser.user_id'=>$user['id'])
@@ -123,7 +123,7 @@ class CommentsUsersController extends AppController {
 							$data['upvoted']=false;
 							$data['downvoted']=false;
 							$commentdata['Comment']['downvotes']=$commentdata['Comment']['downvotes']-1;
-							debug($user['downvotes']);
+							//debug($user['downvotes']);
 							$user['downvotes']=$user['downvotes']-1;
 							debug($user['downvotes']);
 						}

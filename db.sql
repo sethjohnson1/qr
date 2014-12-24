@@ -7,7 +7,7 @@ everything: created, modified, active, deleted etc. add later
 
 drop table if exists users;
 create table users(
-	id int not null auto_increment,
+	id varchar(36) not null,
 	primary key(id),
 	given_name varchar(255),
 	family_name varchar(255),
@@ -17,7 +17,7 @@ create table users(
 	active tinyint(1),
 	ip varchar(20),
 	provider varchar(100),
-	-- oid varchar(200), we just use this for id now
+	oid varchar(200),
 	user_identity varchar(255),
 	username varchar(255),
 	gender varchar(10),
@@ -26,8 +26,19 @@ create table users(
 	flags int,
 	upvotes int,
 	downvotes int,
-	avgrating int -- long way off, but calculate their average rating of stuff
-	
+	avgrating int, -- long way off, but calculate their average rating of stuff
+	-- now for the Users plugin
+	slug varchar(255),
+	password varchar(128),
+	password_token varchar(128),
+	email varchar(255),
+	email_verified varchar(255),
+	email_token varchar(255),
+	email_token_expires datetime,
+	tos tinyint(1),
+	last_action datetime,
+	is_admin tinyint(1),
+	role varchar(255)
 );
 
 -- for tracking user interaction with comments, not to be confused with the one-to-many relationship between users and their own comments
@@ -35,7 +46,7 @@ drop table if exists comments_users;
 create table comments_users(
 	id int not null auto_increment,
 	primary key(id),
-	user_id int,
+	user_id varchar(36),
 	comment_id varchar(40),
 	created datetime,
 	modified datetime,
@@ -47,18 +58,6 @@ create table comments_users(
 
 
 drop table if exists comments;
-/* create table comments(
-	id int not null auto_increment,
-	primary key(id),
-	thoughts text, -- because the word 'comment' is reserved
-	rating int,
-	created datetime,
-	modified datetime,
-	user_id int,
-	hidden tinyint(1),
-	flagged int -- this is a number so we can count number of flags, maybe shut it down after so many
-);
-*/
 -- expermineting with new structure
 create table comments(
 	id varchar(40) not null, -- maybe this should be a UUID - yes definitely because they'll be used in URLs
@@ -67,7 +66,7 @@ create table comments(
 	rating int,
 	created datetime,
 	modified datetime,
-	user_id int,
+	user_id varchar(36),
 	parent_id int, -- maybe not threaded but just in case, should probably max at 3
 	template_id int,
 	hidden tinyint(1),

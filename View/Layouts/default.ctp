@@ -31,10 +31,10 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 			<h1><?php echo $this->Html->link($cakeDescription, 'http://cakephp.org'); ?></h1>
 			<ul>
 					<li><?php echo $this->Html->link('FBAuth', array('controller' => 'users', 'action' => 'auth_login','Facebook')); ?></li>
-		<li><?php echo $this->Html->link('DAuth', array('controller' => 'users', 'action' => 'dummyAuth')); ?></li>
-		<li><?php echo $this->Html->link('GAuth', array('controller' => 'users', 'action' => 'auth_login','Google')); ?></li>
-		<li><?php echo $this->Html->link('TAuth', array('controller' => 'users', 'action' => 'auth_login','Twitter')); ?></li>
-		<li><?php echo $this->Html->link('Logout', array('controller' => 'users', 'action' => 'logout')); ?></li>
+		<li><?php echo $this->Html->link('EmAuth', array('plugin'=>'users','controller' => 'users', 'action' => 'login')); ?></li>
+		<li><?php echo $this->Html->link('GAuth', array('plugin'=>'users','controller' => 'users', 'action' => 'auth_login','Google')); ?></li>
+		<li><?php echo $this->Html->link('TAuth', array('plugin'=>'users','controller' => 'users', 'action' => 'auth_login','Twitter')); ?></li>
+		<li><?php echo $this->Html->link('Logout', array('plugin'=>'users','controller' => 'users', 'action' => 'logout')); ?></li>
 			</ul>
 		</div>
 		<div id="content">

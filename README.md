@@ -1,5 +1,4 @@
-intern-list
+qr - abandoned
 ===========
 
-Will be used as a registry for internships in conservation. More documentation to follow.
-Just getting this started, it will be loosely based on the conf-list from Niles.
+I have merged all of this with the jQuery mobile version qr-pub.

@@ -31,7 +31,7 @@ class TemplatesController extends AppController {
 		//user Comments component to load up view variables
 		$comments=$this->Comment->getComments($id,$user['id']);
 		$usercomment=$this->Comment->userComment($id,$user['id']);
-		debug($usercomment);
+		debug($comments);
 		$this->set(compact('comments','template','usercomment'));
 	}
 	
